@@ -146,6 +146,18 @@ struct ContentView: View {
             sandboxCopy(startupSrc, (tempDir as NSString).appendingPathComponent("startup.st"))
         }
 
+        // Copy startup-user.st if present. writeStartupScript() unconditionally
+        // regenerates startup.st/startup-13.st/startup-14.st on every launch (see
+        // docs/startup-system.md), but its generated dispatcher fileIns
+        // startup-user.st from the working directory afterward and never
+        // overwrites it — so it must be carried into the sandbox alongside the
+        // image for CLI --image launches, the same as the library-based launch
+        // path where the image directory is persistent.
+        let startupUserSrc = (sourceDir as NSString).appendingPathComponent("startup-user.st")
+        if fm.fileExists(atPath: startupUserSrc) {
+            sandboxCopy(startupUserSrc, (tempDir as NSString).appendingPathComponent("startup-user.st"))
+        }
+
         return (tempDir as NSString).appendingPathComponent("\(baseName).image")
     }
 
