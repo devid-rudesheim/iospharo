@@ -25,6 +25,37 @@
 	<integer>536870912</integer>
 	<key>NSMotionUsageDescription</key>
 	<string>Pharo uses device motion sensors (accelerometer, gyroscope, magnetometer) for interactive programs and experiments.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Pharo programs you run can read your location while the app is in use.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Pharo programs you run can read your location, including while the app is in the background.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>PharoProgram</key>
+		<string>A Pharo program you are running needs your precise location.</string>
+	</dict>
+	<key>NSNearbyInteractionUsageDescription</key>
+	<string>Pharo programs you run can measure distance and direction to nearby devices.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Pharo programs you run can use the camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Pharo programs you run can use the microphone.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Pharo programs you run can use speech recognition.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Pharo programs you run can read and save photos in your library.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Pharo programs you run can save photos to your library.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Pharo programs you run can access your music and media library.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Pharo programs you run can authenticate you with Face ID.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Pharo programs you run can communicate with Bluetooth devices.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Pharo programs you run can discover and connect to devices on your local network.</string>
+	<key>NFCReaderUsageDescription</key>
+	<string>Pharo programs you run can read NFC tags.</string>
 	<key>UIUserInterfaceStyle</key>
 	<string>Light</string>
 	<key>UIFileSharingEnabled</key>
