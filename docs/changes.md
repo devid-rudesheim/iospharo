@@ -2,6 +2,24 @@
 
 Build 122 — 2026-04-01
 
+## Fix FFI callbacks from inside a primitive resuming the caller too early
+
+When C code invoked a Smalltalk callback while a primitive was still running
+(e.g. `primitiveRegisterSurface` calling the Athens `getSurfaceFormat`
+callback), `enterInterpreterFromCallback` woke the callback handler with
+`synchronousSignal`. The handler ("Callback queue", priority 70) outranks the
+caller, so `synchronousSignal` called `putToSleep()` on the active process,
+which is the very process being parked in `SuspendedProcessInCallout`. The
+caller went back on the run queue, the following `wakeHighestPriority()`
+overwrote the handler as active, and the callback never ran. The caller was
+later resumed with the primitive's arguments still on its stack, so
+`AthensCairoSurface class>>registerSurface:` saw its `ByteArray` id holder as
+the primitive result (`mustBeBoolean`) and every `SpAthensMorph` failed to draw.
+
+`signalSemaphoreDirectly` (only used for callback entry) now only makes the
+waiting handler runnable and never preempts or re-queues the active process,
+matching the reference VM's `ptEnterInterpreterFromCallback`.
+
 ## Fix `anObject pointsTo:` reporting false matches on word arrays
 
 `primitiveObjectPointsTo` (primitive 132) guarded the word-array case with
