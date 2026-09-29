@@ -2022,7 +2022,9 @@ private:
     /// restores the original process, and siglongjmps back to C.
     VMCallbackContext* pendingCallbackReturn_ = nullptr;
 
-    /// Signal a semaphore directly by external index (synchronous, not via atomic)
+    /// Signal a semaphore directly by external index (synchronous, not via atomic).
+    /// The woken process is only made runnable; the active process is never
+    /// preempted or re-queued (it is the process being suspended in a callout).
     void signalSemaphoreDirectly(int externalIndex);
 };
 

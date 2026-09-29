@@ -1799,7 +1799,21 @@ void Interpreter::signalSemaphoreDirectly(int externalIndex) {
     if (idx >= memory_.slotCountOf(semTable)) return;
     Oop semaphore = memory_.fetchPointer(idx, semTable);
     if (semaphore.isNil() || !semaphore.isObject()) return;
-    synchronousSignal(semaphore);
+
+    // Make the waiting process runnable, but never preempt the active process.
+    // The only caller is enterInterpreterFromCallback, where the active process
+    // is the one being suspended in the callout. synchronousSignal would
+    // putToSleep() it when the woken handler has a higher priority, putting a
+    // process that is still inside a primitive back on the run queue.
+    Oop firstLink = memory_.fetchPointer(LinkedListFirstLinkIndex, semaphore);
+    if (firstLink.isNil() || safeProcessPriority(firstLink) < 0) {
+        Oop excessOop = memory_.fetchPointer(SemaphoreExcessSignalsIndex, semaphore);
+        int64_t excess = excessOop.isSmallInteger() ? excessOop.asSmallInteger() : 0;
+        memory_.storePointer(SemaphoreExcessSignalsIndex, semaphore,
+                            Oop::fromSmallInteger(excess + 1));
+        return;
+    }
+    putToSleep(removeFirstLinkOfList(semaphore));
 }
 
 // ===== FFI CALLBACK SUPPORT =====
@@ -1832,7 +1846,11 @@ void Interpreter::enterInterpreterFromCallback(VMCallbackContext* vmcc) {
         callbackContextStack_[callbackDepth_++] = vmcc;
     }
 
-    // 5. Signal callback semaphore to wake handler process
+    // 5. Signal callback semaphore to wake handler process.
+    //    The signal must not preempt: the active process is the callout
+    //    process, which is parked in SuspendedProcessInCallout and must stay
+    //    off the run queue until the callback returns (as in the reference
+    //    VM's ptEnterInterpreterFromCallback).
     if (g_callbackSemaphoreIndex > 0) {
         signalSemaphoreDirectly(g_callbackSemaphoreIndex);
     }
