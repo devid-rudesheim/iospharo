@@ -478,7 +478,8 @@ class PharoCanvasViewController: UIViewController {
             #endif
         } else if view.bounds.width != frozenWidth {
             // Width changed → real resize (rotation, Stage Manager, split view).
-            // Update height to match new available space.
+            // Update top offset and height to match new available space.
+            topConstraint?.constant = topInset
             heightConstraint?.constant = availableHeight
             frozenWidth = view.bounds.width
             #if DEBUG

@@ -2,6 +2,25 @@
 
 Build 122 — 2026-04-01
 
+## iPhone portrait orientation (fork-only, not for upstream)
+
+The iPhone was locked to landscape because Pharo's stock windows do not fit in
+~390pt of width.  This fork is used to run a purpose-built app (not as a
+general Pharo IDE), so iPhone now also supports portrait.
+
+- `INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone` gains
+  `UIInterfaceOrientationPortrait` (upside-down stays unsupported).
+- In portrait the modifier strip becomes a horizontal bar above the canvas
+  (top, because the docked keyboard covers the bottom).  Landscape and iPad
+  layouts are unchanged.
+- `PharoCanvasViewController` now updates its top offset together with the
+  height when the width changes (previously only the height), so a rotation
+  does not leave a stale offset.
+
+Known limits: stock Pharo windows and the menu bar are wider than the
+portrait screen (see docs/upstream-proposals.md item 7); the Quick Start
+overlay still describes a "Left strip".
+
 ## Fix `anObject pointsTo:` reporting false matches on word arrays
 
 `primitiveObjectPointsTo` (primitive 132) guarded the word-array case with

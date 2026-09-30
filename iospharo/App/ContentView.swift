@@ -197,6 +197,21 @@ struct ContentView: View {
             PharoCanvasView(bridge: bridge)
                 .ignoresSafeArea()
             #else
+            GeometryReader { geometry in
+            let portraitPhone = !bridge.isIPad && geometry.size.height > geometry.size.width
+            if portraitPhone {
+                // iPhone portrait: a horizontal bar above the canvas.  It sits
+                // at the top because the docked keyboard covers the bottom.
+                VStack(spacing: 0) {
+                    ModifierStrip(
+                        bridge: bridge,
+                        keyboardVisible: $bridge.keyboardVisible,
+                        showHelp: $showingHelp,
+                        axis: .horizontal
+                    )
+                    PharoCanvasView(bridge: bridge)
+                }
+            } else {
             HStack(spacing: 0) {
                 if stripOnRight {
                     PharoCanvasView(bridge: bridge)
@@ -213,6 +228,8 @@ struct ContentView: View {
                     )
                     PharoCanvasView(bridge: bridge)
                 }
+            }
+            }
             }
             // Ignore keyboard safe area so SwiftUI doesn't resize the view when
             // the keyboard appears (docked or floating). Container safe areas
@@ -382,6 +399,9 @@ struct ModifierStrip: View {
     @ObservedObject var bridge: PharoBridge
     @Binding var keyboardVisible: Bool
     @Binding var showHelp: Bool
+    /// `.horizontal` lays the iPhone strip out as a bar (portrait).  The
+    /// iPad layout ignores it; iPads always use the vertical strip.
+    var axis: Axis = .vertical
 
     private var isIPad: Bool { bridge.isIPad }
 
@@ -503,7 +523,25 @@ struct ModifierStrip: View {
     }
 
     var body: some View {
-        if isIPad {
+        if !isIPad && axis == .horizontal {
+            // iPhone portrait: same buttons as the vertical strip, in a row.
+            // The bar sits below the status bar / Dynamic Island, so no
+            // corner or island padding is needed.
+            HStack(spacing: buttonSpacing) {
+                keyboardButton
+                ctrlButton
+                cmdButton
+                Spacer()
+                backspaceButton
+                doItButton
+                printButton
+                inspectButton
+            }
+            .padding(.vertical, 2)
+            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity)
+            .background(Color(.systemGray6).opacity(0.95))
+        } else if isIPad {
             // iPad: 28pt gap clears the Pharo menu bar, then buttons.
             // Keyboard toggle at top so it's always accessible.
             // When keyboard is showing, keep essential coding buttons visible
