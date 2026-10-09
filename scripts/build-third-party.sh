@@ -497,10 +497,18 @@ build_libgit2() {
         )
     fi
 
+    # Cross-compiling with an iOS sysroot still lets libgit2's CMake probe find
+    # the macOS host's pcre.h (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE defaults to
+    # BOTH), so it silently selects the pcre regex backend even though no
+    # pcre.a is built or linked into the static xcframework, which fails at
+    # link time with undefined _pcre_compile/_pcre_exec/_pcre_free. Force the
+    # bundled backend, which needs no external library, instead of linking an
+    # extra pcre xcframework we don't otherwise need.
     build_cmake "libgit2" "$srcdir" \
         -DBUILD_TESTS=OFF \
         -DBUILD_CLI=OFF \
         -DUSE_BUNDLED_ZLIB=OFF \
+        -DREGEX_BACKEND=builtin \
         "${cmake_extra[@]}"
 }
 
